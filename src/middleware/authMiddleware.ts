@@ -10,11 +10,11 @@ export async function authMiddleware(req: NextRequest) {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-    (req as any).user = decoded;  // Attach userId to req for future use
-    return null;  // Proceed to next (valid token)
-  } catch (error: any) {
-    if (error.name === 'TokenExpiredError') {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
+    (req as any).user = decoded; // TODO: Replace with proper type
+    return null;
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
       return NextResponse.json({ error: 'Access token expired' }, { status: 401 });
     }
     return NextResponse.json({ error: 'Invalid token' }, { status: 401 });

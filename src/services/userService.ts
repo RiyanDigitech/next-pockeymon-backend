@@ -3,10 +3,8 @@ import jwt from 'jsonwebtoken';
 import { SignupBody, LoginBody, UserPayload } from '@/types';
 
 export class UserService {
-  // Only create user, no token
   static async createUser(body: SignupBody): Promise<UserPayload> {
     const { name, email, password, phone } = body;
-
     if (!name || !email || !password || !phone) {
       throw new Error('All fields are required');
     }
@@ -27,8 +25,7 @@ export class UserService {
     };
   }
 
-  // Login: return payload + token
-  static async loginUser(email: string, password: string): Promise<{ payload: UserPayload; token: string }> {
+  static async loginUser({ email, password }: LoginBody): Promise<{ payload: UserPayload; token: string }> {
     if (!email || !password) {
       throw new Error('Email and password are required');
     }
@@ -50,9 +47,8 @@ export class UserService {
     return { payload, token };
   }
 
-
   static async getAllUsers(): Promise<UserPayload[]> {
-    const users = await User.find({}).select('-password -__v');  // Explicitly exclude password/__v
+    const users = await User.find({}).select('-password -__v');
     return users.map((user) => ({
       id: user._id.toString(),
       name: user.name,

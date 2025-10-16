@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const body: SignupBody = await req.json();  // Body parse yahan, lekin validation controller/service mein
     const result = await AuthController.signup(body);
     return NextResponse.json(result, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+  } catch (error) {
+    return NextResponse.json({ error: (error as Error).message }, { status: 400 });
   }
 }
