@@ -1,16 +1,21 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { authMiddleware } from '@/middleware/authMiddleware';
 import { TeamController } from '@/controllers/teamController';
-import { AuthRequest, UpdateTeamBody } from '@/types';
+import { UpdateTeamBody } from '@/types';
 
-export async function PUT(req: AuthRequest, { params }: { params: { id: string } }) {
+// Define AuthRequest type specifically for this route
+interface AuthRequest extends NextRequest {
+  user?: { userId: string };
+}
+
+export async function PUT(req: AuthRequest, context: { params: { id: string } }) {
   const authError = await authMiddleware(req);
   if (authError) return authError;
 
   try {
     await connectDB();
-    const teamId = params.id;
+    const teamId = context.params.id;
     const body = await req.json() as UpdateTeamBody;
     const result = await TeamController.updateTeam(req.user!.userId, teamId, body);
     return NextResponse.json(result, { status: 200 });
@@ -19,13 +24,13 @@ export async function PUT(req: AuthRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: AuthRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: AuthRequest, context: { params: { id: string } }) {
   const authError = await authMiddleware(req);
   if (authError) return authError;
 
   try {
     await connectDB();
-    const teamId = params.id;
+    const teamId = context.params.id;
     const result = await TeamController.deleteTeam(req.user!.userId, teamId);
     return NextResponse.json(result, { status: 200 });
   } catch (error) {

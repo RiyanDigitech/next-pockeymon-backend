@@ -64,3 +64,21 @@ export interface UpdateTeamBody {
   name?: string;
   pokemons?: string[];
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
