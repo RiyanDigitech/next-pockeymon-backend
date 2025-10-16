@@ -7,8 +7,8 @@ export class AuthController {
     return { message: 'User created successfully', details: payload };
   }
 
-  static async login(body: LoginBody): Promise<AuthResponse> {
-    const { payload, token } = await UserService.loginUser(body.email, body.password);
+static async login(body: LoginBody): Promise<AuthResponse> {
+    const { payload, token } = await UserService.loginUser(body); // Pass body directly
     return { message: 'Login successful', details: payload, token };
   }
 }

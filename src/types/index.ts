@@ -1,3 +1,4 @@
+import { NextRequest } from 'next/server';
 export interface SignupBody {
   name: string;
   email: string;
@@ -21,4 +22,8 @@ export interface AuthResponse {
   message: string;
   details?: UserPayload;
   token?: string; // Optional
+}
+
+export interface AuthRequest extends NextRequest {
+  user?: { userId: string };
 }

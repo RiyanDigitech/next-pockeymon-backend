@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import { AuthRequest } from '@/types';
 
-export async function authMiddleware(req: NextRequest) {
+export async function authMiddleware(req: AuthRequest) {
   const authHeader = req.headers.get('authorization');
   const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
 
@@ -11,7 +12,7 @@ export async function authMiddleware(req: NextRequest) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-    (req as any).user = decoded; // TODO: Replace with proper type
+    req.user = decoded; // Use AuthRequest type
     return null;
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
