@@ -1,87 +1,86 @@
-// import { NextResponse, NextRequest } from 'next/server';
-// import { connectDB } from '@/lib/db';
-// import { authMiddleware } from '@/middleware/authMiddleware';
-// import { TeamController } from '@/controllers/teamController';
-// import { UpdateTeamBody, AuthRequest } from '@/types'; // Import AuthRequest from your types file
-
-// export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-//   // Run the middleware. It will add the 'user' property to 'req' if successful.
-//   const authError = await authMiddleware(req as AuthRequest);
-//   if (authError) return authError;
-
-//   // Now you can safely access req.user
-//   const authenticatedRequest = req as AuthRequest;
-
-//   try {
-//     await connectDB();
-//     const teamId = params.id;
-//     const body = (await req.json()) as UpdateTeamBody;
-//     const result = await TeamController.updateTeam(authenticatedRequest.user!.userId, teamId, body);
-//     return NextResponse.json(result, { status: 200 });
-//   } catch (error) {
-//     return NextResponse.json({ error: (error as Error).message }, { status: 400 });
-//   }
-// }
-
-// export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-//   // Run the middleware
-//   const authError = await authMiddleware(req as AuthRequest);
-//   if (authError) return authError;
-
-//   // Cast to AuthRequest to access the user property
-//   const authenticatedRequest = req as AuthRequest;
-
-//   try {
-//     await connectDB();
-//     const teamId = params.id;
-//     const result = await TeamController.deleteTeam(authenticatedRequest.user!.userId, teamId);
-//     return NextResponse.json(result, { status: 200 });
-//   } catch (error) {
-//     return NextResponse.json({ error: (error as Error).message }, { status: 400 });
-//   }
-// }
 import { NextResponse, NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { authMiddleware } from '@/middleware/authMiddleware';
 import { TeamController } from '@/controllers/teamController';
-import { UpdateTeamBody } from '@/types';
+import { UpdateTeamBody, AuthRequest } from '@/types';
 
-interface AuthRequest extends NextRequest {
-  user?: { userId: string };
-}
+// Route handler ke doosre argument ke liye ek saaf type define karein
+// Yeh best practice hai aur build errors se bachata hai
+type RouteContext = {
+  params: {
+    id: string;
+  };
+};
 
-// ✅ Works in Next.js 15.5.x and earlier 14.x — no RouteContext needed
-export async function PUT(
-  req: AuthRequest,
-  { params }: { params: { id: string } }
-) {
-  const authError = await authMiddleware(req);
-  if (authError) return authError;
+// =================================================================
+//                        UPDATE A TEAM (PUT)
+// =================================================================
+export async function PUT(req: NextRequest, context: RouteContext) {
+  // Middleware ko call karein. Kamyab hone par yeh 'req' mein 'user' daal dega.
+  // Hum 'req' ko AuthRequest ke tor par cast karte hain taake middleware usay process kar sake.
+  const authError = await authMiddleware(req as AuthRequest);
+  if (authError) {
+    return authError;
+  }
 
+  // Ab hum yaqeen se 'req' ko AuthRequest maan sakte hain
+  const authenticatedRequest = req as AuthRequest;
+  
   try {
     await connectDB();
+
+    // Context object se 'params' aur phir 'id' nikalein
+    const { params } = context;
     const teamId = params.id;
+    
     const body = (await req.json()) as UpdateTeamBody;
-    const result = await TeamController.updateTeam(req.user!.userId, teamId, body);
+    
+    // Controller ko call karein
+    const result = await TeamController.updateTeam(
+      authenticatedRequest.user!.userId,
+      teamId,
+      body
+    );
+    
     return NextResponse.json(result, { status: 200 });
+
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 400 });
+    // Aam errors ko handle karein
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    return NextResponse.json({ error: errorMessage }, { status: 400 });
   }
 }
 
-export async function DELETE(
-  req: AuthRequest,
-  { params }: { params: { id: string } }
-) {
-  const authError = await authMiddleware(req);
-  if (authError) return authError;
+// =================================================================
+//                        DELETE A TEAM
+// =================================================================
+export async function DELETE(req: NextRequest, context: RouteContext) {
+  // Middleware ko call karein
+  const authError = await authMiddleware(req as AuthRequest);
+  if (authError) {
+    return authError;
+  }
+  
+  // Ab 'req' authenticated hai
+  const authenticatedRequest = req as AuthRequest;
 
   try {
     await connectDB();
+    
+    // Context se teamId nikalein
+    const { params } = context;
     const teamId = params.id;
-    const result = await TeamController.deleteTeam(req.user!.userId, teamId);
+    
+    // Controller ko call karein
+    const result = await TeamController.deleteTeam(
+      authenticatedRequest.user!.userId,
+      teamId
+    );
+    
     return NextResponse.json(result, { status: 200 });
+
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 400 });
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    return NextResponse.json({ error: errorMessage }, { status: 400 });
   }
 }
