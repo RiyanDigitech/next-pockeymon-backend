@@ -62,8 +62,8 @@ export class TeamService {
         name: team.name,
         pokemons: team.pokemons,
       };
-    } catch (error: unknown) {
-      const mongoError = error as MongoError;
+    } catch (_error: unknown) {
+      const mongoError = _error as MongoError;
       if (mongoError.code === 11000) {
         throw new Error('Team name already exists');
       }
@@ -125,8 +125,8 @@ export class TeamService {
         name: team.name,
         pokemons: team.pokemons,
       };
-    } catch (error: unknown) {
-      const mongoError = error as MongoError;
+    } catch (_error: unknown) {
+      const mongoError = _error as MongoError;
       if (mongoError.code === 11000) {
         throw new Error('Team name already exists');
       }
