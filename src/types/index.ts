@@ -44,8 +44,23 @@ export interface Pokemon {
   baseExperience: number;
 }
 
-// New: Type for PokéAPI's type object
 export interface PokemonType {
   slot: number;
   type: { name: string; url: string };
+}
+
+export interface TeamPayload {
+  id: string;
+  name: string;
+  pokemons: string[];
+}
+
+export interface CreateTeamBody {
+  name: string;
+  pokemons: string[];
+}
+
+export interface UpdateTeamBody {
+  name?: string;
+  pokemons?: string[];
 }
