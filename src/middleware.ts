@@ -7,6 +7,7 @@ export function middleware(req: NextRequest) {
   // Allow local + deployed frontend URLs
   const allowedOrigins = [
     'http://localhost:5173', // if Vite
+    'https://react-base-setup-antd.vercel.app', // your deployed frontend domain
     'http://localhost:3000', // if CRA or Next.js frontend
     'https://next-pockeymon-frontend.vercel.app', // your deployed frontend domain
   ];
