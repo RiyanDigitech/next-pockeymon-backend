@@ -134,14 +134,39 @@ export class TeamService {
     }
   }
 
-  static async getAllTeams(userId: string): Promise<TeamPayload[]> {
-    const teams = await Team.find({ userId });
-    return teams.map((team) => ({
+  // static async getAllTeams(userId: string): Promise<TeamPayload[]> {
+  //   const teams = await Team.find({ userId });
+  //   return teams.map((team) => ({
+  //     id: team._id.toString(),
+  //     name: team.name,
+  //     pokemons: team.pokemons,
+  //   }));
+  // }
+static async getAllTeams(
+  userId: string,
+  page: number = 1,
+  limit: number = 10
+): Promise<{ teams: TeamPayload[]; total: number }> {
+
+  const skip = (page - 1) * limit;
+
+  const [teams, total] = await Promise.all([
+    Team.find({ userId })
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 }),
+    Team.countDocuments({ userId }),
+  ]);
+
+  return {
+    teams: teams.map((team) => ({
       id: team._id.toString(),
       name: team.name,
       pokemons: team.pokemons,
-    }));
-  }
+    })),
+    total,
+  };
+}
 
   static async deleteTeam(userId: string, teamId: string): Promise<void> {
     const team = await Team.findOne({ _id: teamId, userId });

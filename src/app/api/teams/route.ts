@@ -14,14 +14,37 @@ interface AuthRequest extends NextRequest {
 }
 */
 
-export async function GET(req: NextRequest) { // Change to NextRequest
+// export async function GET(req: NextRequest) { // Change to NextRequest
+//   const authError = await authMiddleware(req as AuthRequest);
+//   if (authError) return authError;
+
+//   try {
+//     await connectDB();
+//     // Cast karein jab req.user ki zaroorat ho
+//     const result = await TeamController.getAllTeams((req as AuthRequest).user!.userId);
+//     return NextResponse.json(result, { status: 200 });
+//   } catch (error) {
+//     return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+//   }
+// }
+
+export async function GET(req: NextRequest) {
   const authError = await authMiddleware(req as AuthRequest);
   if (authError) return authError;
 
   try {
     await connectDB();
-    // Cast karein jab req.user ki zaroorat ho
-    const result = await TeamController.getAllTeams((req as AuthRequest).user!.userId);
+
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+
+    const result = await TeamController.getAllTeams(
+      (req as AuthRequest).user!.userId,
+      page,
+      limit
+    );
+
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: (error as Error).message }, { status: 500 });
